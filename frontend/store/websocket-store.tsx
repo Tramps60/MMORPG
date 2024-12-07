@@ -27,7 +27,6 @@ export const useWebsocketStore = create<WebsocketStateTS>((set, get) => ({
       try {
         const message = JSON.parse(event.data);
         console.log(message)
-        // set({ messages: [...get().messages, message] });
       } catch (error) {
         console.error("error parsing websocket message:", error);
       }
