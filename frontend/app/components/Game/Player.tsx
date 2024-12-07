@@ -2,15 +2,15 @@
 
 import { PLAYER_SPEED } from "@/constants/game";
 import { useWebsocketStore } from "@/store/websocket-store";
-import { GameStateTS } from "@/types/game";
+import { GameStateTS, PlayerTS } from "@/types/game";
 import { useFrame } from "@react-three/fiber";
 import React, { useRef } from "react";
 import { InstancedMesh } from "three";
 
 type PlayerPropsTS = Pick<
   GameStateTS,
-  "player" | "path" | "updatePlayerPosition" | "removeFirstPathPoint"
->;
+  "path" | "updatePlayerPosition" | "removeFirstPathPoint"
+> & { player: PlayerTS };
 
 export default React.memo(function Player({
   player,
@@ -19,7 +19,7 @@ export default React.memo(function Player({
   removeFirstPathPoint,
 }: PlayerPropsTS) {
   const meshRef = useRef<InstancedMesh>(null);
-  const sendMessage = useWebsocketStore((state) => state.sendMessage)
+  const sendMessage = useWebsocketStore((state) => state.sendMessage);
 
   useFrame((_, delta) => {
     if (!meshRef.current || path.length === 0) {

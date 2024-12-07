@@ -11,7 +11,10 @@ export type PlayerTS = {
 };
 
 export type GameStateTS = {
-  player: PlayerTS;
+  player?: PlayerTS;
+  setPlayer: (client_id: string, position: Vector2) => void;
+  otherPlayers: PlayerTS[];
+  updateOtherPlayers: (client_id: string, position: Vector2) => void;
   updatePlayerPosition: (
     position: Vector2,
     sendMessage: (message: WebsocketMessage<{ x: number; y: number }>) => void

@@ -1,13 +1,31 @@
 import { GameStateTS, Vector2 } from "@/types/game";
 import { findPath } from "@/utils/pathfinding";
 import { create } from "zustand";
-import { v4 as uuidv4 } from "uuid";
-import { WebsocketMessage } from "@/types/websocket";
-
-const initialPlayer = { id: uuidv4(), position: { x: 0, y: 0 } };
 
 export const useGameStore = create<GameStateTS>((set, get) => ({
-  player: initialPlayer,
+  player: undefined,
+  setPlayer: (client_id, position) => {
+    set(() => ({ player: { id: client_id, position } }));
+  },
+
+  otherPlayers: [],
+  updateOtherPlayers: (client_id, position) => {
+    const { otherPlayers } = get();
+    
+    // Find if player already exists
+    const existingPlayerIndex = otherPlayers.findIndex(p => p.id === client_id);
+    
+    if (existingPlayerIndex !== -1) {
+      // Update existing player
+      const updatedPlayers = [...otherPlayers];
+      updatedPlayers[existingPlayerIndex].position = position;
+      set({ otherPlayers: updatedPlayers });
+    } else {
+      // Add new player
+      set({ otherPlayers: [...otherPlayers, { id: client_id, position }] });
+    }
+  },
+
   targetPosition: undefined,
   path: [],
 
@@ -24,29 +42,31 @@ export const useGameStore = create<GameStateTS>((set, get) => ({
 
   updatePath: async () => {
     const { player, targetPosition } = get();
-    if (!targetPosition) {
+    if (!player || !targetPosition) {
       return;
     }
     const path = await findPath(player.position, targetPosition);
     set({ path });
   },
 
-  updatePlayerPosition: (
-    position: Vector2,
-    sendMessage: (message: WebsocketMessage<{ x: number; y: number }>) => void
-  ) => {
-    set((state) => ({
+  updatePlayerPosition: (position, sendMessage) => {
+    const { player } = get();
+
+    if (!player) {
+      return;
+    }
+
+    set(() => ({
       player: {
-        ...state.player,
+        ...player,
         position,
       },
     }));
-    const { id, position: newPosition } = get().player;
 
     sendMessage({
       type: "Position",
-      client_id: id,
-      data: { x: newPosition.x, y: newPosition.y },
+      client_id: player.id,
+      data: { x: player.position.x, y: player.position.y },
     });
   },
 

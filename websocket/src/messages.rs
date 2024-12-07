@@ -1,26 +1,14 @@
-use axum::{extract::ws::{Message, WebSocket}, Error};
-use futures::{stream::SplitSink, SinkExt};
-use serde_json::json;
+use tokio::sync::broadcast;
 
-use crate::types::{ClientMessagePayload, NewConnection, Position};
+use crate::types::{ClientMessage, ClientMessagePayload, NewConnection, Position};
 
 pub async fn handle_position_message(
     payload: ClientMessagePayload<Position>,
-    sender: &mut SplitSink<WebSocket, Message>
-) -> Result<(), Error> {
-
-    let response = json!({
-        "type": "Position",
-        "client_id": payload.client_id,
-        "data": {
-            "x": payload.data.x,
-            "y": payload.data.y
-        }
-    });
-
-    sender.send(Message::Text(response.to_string())).await?;
-
-    Ok(())
+    broadcast_sender: &broadcast::Sender<ClientMessage>
+) {
+    if let Err(e) = broadcast_sender.send(ClientMessage::Position(payload)) {
+        println!("error broadcasting message: {}", e);
+    };
 }
 
 /**
@@ -34,19 +22,9 @@ pub async fn handle_position_message(
  */
 pub async fn handle_new_connection_message(
     payload: ClientMessagePayload<NewConnection>,
-    sender: &mut SplitSink<WebSocket, Message>
-) -> Result<(), Error> {
-
-    let response = json!({
-        "type": "NewConnection",
-        "client_id": payload.client_id,
-        "data": {
-            "x": 2,
-            "y": 2,
-        },
-    });
-
-    sender.send(Message::Text(response.to_string())).await?;
-
-    Ok(())
+    broadcast_sender: &broadcast::Sender<ClientMessage>
+) {
+    if let Err(e) = broadcast_sender.send(ClientMessage::NewConnection(payload)) {
+        println!("error broadcasting message: {}", e);
+    };
 }

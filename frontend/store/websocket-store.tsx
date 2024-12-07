@@ -5,7 +5,7 @@ export const useWebsocketStore = create<WebsocketStateTS>((set, get) => ({
   socket: null,
   isConnected: false,
   messages: [],
-  connect: (url) => {
+  connect: (url, setPlayer, updateOtherPlayers) => {
     if (get().socket?.readyState === WebSocket.OPEN) {
       console.warn("Websocket is already connected");
       return;
@@ -26,7 +26,14 @@ export const useWebsocketStore = create<WebsocketStateTS>((set, get) => ({
     socket.onmessage = (event: MessageEvent) => {
       try {
         const message = JSON.parse(event.data);
-        console.log(message)
+        if (message.type === 'NewConnection') {
+          const { client_id, position } = message.data;
+          setPlayer(client_id, position)
+        }
+
+        if (message.type === 'Position') {
+          updateOtherPlayers(message.client_id, message.data)
+        }
       } catch (error) {
         console.error("error parsing websocket message:", error);
       }

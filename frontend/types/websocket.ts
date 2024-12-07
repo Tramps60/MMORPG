@@ -1,3 +1,5 @@
+import { Vector2 } from "./game";
+
 export type WebsocketMessage<T = Record<string, string>> = {
   type: string;
   client_id: string;
@@ -7,7 +9,11 @@ export type WebsocketMessage<T = Record<string, string>> = {
 export type WebsocketStateTS = {
   socket: WebSocket | null;
   isConnected: boolean;
-  connect: (url: string) => void;
+  connect: (
+    url: string,
+    setPlayer: (client_id: string, position: Vector2) => void,
+    updateOtherPlayers: (client_id: string, position: Vector2) => void,
+  ) => void;
   disconnect: () => void;
   sendMessage: <T = Record<string, string>>(
     message: WebsocketMessage<T>
