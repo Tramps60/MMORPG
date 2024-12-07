@@ -1,8 +1,10 @@
 import { GameStateTS, Vector2 } from "@/types/game";
 import { findPath } from "@/utils/pathfinding";
 import { create } from "zustand";
+import { v4 as uuidv4 } from "uuid";
+import { WebsocketMessage } from "@/types/websocket";
 
-const initialPlayer = { position: { x: 0, y: 0 } };
+const initialPlayer = { id: uuidv4(), position: { x: 0, y: 0 } };
 
 export const useGameStore = create<GameStateTS>((set, get) => ({
   player: initialPlayer,
@@ -10,7 +12,7 @@ export const useGameStore = create<GameStateTS>((set, get) => ({
   path: [],
 
   setTargetPosition: (position: Vector2) => {
-    let debounceTimer = undefined
+    let debounceTimer = undefined;
 
     clearTimeout(debounceTimer);
 
@@ -29,13 +31,23 @@ export const useGameStore = create<GameStateTS>((set, get) => ({
     set({ path });
   },
 
-  updatePlayerPosition: (position: Vector2) => {
+  updatePlayerPosition: (
+    position: Vector2,
+    sendMessage: (message: WebsocketMessage<{ x: number; y: number }>) => void
+  ) => {
     set((state) => ({
       player: {
         ...state.player,
         position,
       },
     }));
+    const { id, position: newPosition } = get().player;
+
+    sendMessage({
+      type: "Position",
+      client_id: id,
+      data: { x: newPosition.x, y: newPosition.y },
+    });
   },
 
   removeFirstPathPoint: () => {

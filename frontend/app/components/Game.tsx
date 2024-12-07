@@ -15,6 +15,10 @@ export default function Game() {
     setTargetPosition,
   } = useGameStore();
 
+  if (! player) {
+    return <div>loading...</div>
+  }
+
   return (
     <Canvas>
       <CameraControls />

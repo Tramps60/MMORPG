@@ -1,6 +1,7 @@
 "use client";
 
 import { PLAYER_SPEED } from "@/constants/game";
+import { useWebsocketStore } from "@/store/websocket-store";
 import { GameStateTS } from "@/types/game";
 import { useFrame } from "@react-three/fiber";
 import React, { useRef } from "react";
@@ -18,6 +19,7 @@ export default React.memo(function Player({
   removeFirstPathPoint,
 }: PlayerPropsTS) {
   const meshRef = useRef<InstancedMesh>(null);
+  const sendMessage = useWebsocketStore((state) => state.sendMessage)
 
   useFrame((_, delta) => {
     if (!meshRef.current || path.length === 0) {
@@ -43,7 +45,7 @@ export default React.memo(function Player({
       y: currentPosition.y + velocityY,
     };
 
-    updatePlayerPosition(newPosition);
+    updatePlayerPosition(newPosition, sendMessage);
 
     meshRef.current.position.x = newPosition.x;
     meshRef.current.position.z = newPosition.y;
