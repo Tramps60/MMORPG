@@ -7,6 +7,7 @@ import { useGameStore } from "@/store/game-store";
 import ContextMenu from "./components/UI/ContextMenu";
 
 export default function Home() {
+
   const { connect, disconnect, isConnected } = useWebsocketStore();
   const { setPlayer, updateRemotePlayer, deleteRemotePlayer } = useGameStore();
 
@@ -22,10 +23,10 @@ export default function Home() {
     <div className="h-screen w-full">
       {!isConnected && <div>connecting to game server...</div>}
       {isConnected && (
-        <>
+        <div className="relative w-full h-screen">
           <Game />
           <HUD />
-        </>
+        </div>
       )}
     </div>
   );

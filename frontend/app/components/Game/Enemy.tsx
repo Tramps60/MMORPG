@@ -8,7 +8,8 @@ export default function Enemy() {
   const openContextMenu = useUIStore((state) => state.openContextMenu);
 
   const handleContextMenu = (event: ThreeEvent<MouseEvent>) => {
-    event.nativeEvent.preventDefault()
+    console.log("context menu triggered");
+    event.nativeEvent.preventDefault();
     event.stopPropagation();
     openContextMenu("enemy", { x: event.clientX, y: event.clientY });
   };
@@ -19,7 +20,6 @@ export default function Enemy() {
       castShadow
       position={[5, 0.5, 5]}
       ref={meshRef}
-      onPointerOver={() => console.log('over')}
     >
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial color="blue" />
