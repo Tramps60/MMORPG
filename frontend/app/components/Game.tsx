@@ -2,12 +2,11 @@
 
 import Ground from "./Game/Ground";
 import Player from "./Game/Player";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { CameraControls } from "@react-three/drei";
 import { useGameStore } from "@/store/game-store";
-import { PlayerTS } from "@/types/game";
-import { useRef } from "react";
-import { Mesh } from "three";
+import RemotePlayers from "./Game/RemotePlayers";
+import Enemy from "./Game/Enemy";
 
 export default function Game() {
   const {
@@ -23,7 +22,12 @@ export default function Game() {
   }
 
   return (
-    <Canvas>
+    <Canvas
+      onPointerMissed={() => console.log('canvas.missed')}
+      onContextMenu={(e) => e.preventDefault()}
+      camera={{ position: [20, 20, 20], fov: 50 }}
+      style={{ height: "100vh" }}
+    >
       <CameraControls />
       <ambientLight />
       <Ground setTargetPosition={setTargetPosition} />
@@ -33,32 +37,8 @@ export default function Game() {
         updatePlayerPosition={updatePlayerPosition}
         removeFirstPathPoint={removeFirstPathPoint}
       />
-      <OtherPlayers />
+      <RemotePlayers />
+      <Enemy />
     </Canvas>
-  );
-}
-
-function OtherPlayers() {
-  const remotePlayers = useGameStore((state) => state.remotePlayers);
-  return Object.entries(remotePlayers).map(([id, position]) => (
-    <OtherPlayer player={{id, position}} key={id} />
-  ));
-}
-
-function OtherPlayer({ player }: { player: PlayerTS }) {
-  const meshRef = useRef<Mesh>(null);
-
-  useFrame(() => {
-    if (!meshRef.current) return;
-    // Update mesh position to match player position
-    meshRef.current.position.x = player.position.x;
-    meshRef.current.position.z = player.position.y; // y in state maps to z in Three.js
-  });
-
-  return (
-    <mesh ref={meshRef} position={[0, 0.5, 0]}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color="green" />
-    </mesh>
   );
 }
