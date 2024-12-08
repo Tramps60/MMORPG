@@ -4,8 +4,8 @@ use axum::{extract::{ws::{Message, WebSocket}, State, WebSocketUpgrade}, respons
 use futures::{SinkExt, StreamExt};
 use tokio::sync::broadcast;
 
-use crate::{types::{ClientMessage, ClientMessagePayload, Disconnection, NewConnection, Position}, Client, GameState};
-use crate::messages::{handle_new_connection_message, handle_position_message};
+use crate::{types::{ClientMessage, ClientMessagePayload, NoDataMessage, NewConnection, Position}, Client, GameState};
+use crate::messages::handle_position_message;
 
 pub async fn websocket_handler(
     websocket: WebSocketUpgrade,
@@ -28,7 +28,7 @@ async fn handle_socket(
 
     let initial_data = ClientMessage::NewConnection(ClientMessagePayload {
         client_id: client_id.clone(),
-        data: NewConnection { client_id: client_id.clone(), position: position.clone() }
+        data: NewConnection { position: position.clone() }
     });
 
     if let Ok(msg) = serde_json::to_string(&initial_data) {
@@ -94,7 +94,7 @@ async fn handle_socket(
             }
             if let Err(e) = broadcast_sender.send(ClientMessage::Disconnection(ClientMessagePayload {
                 client_id: client_id_for_recieve,
-                data: Disconnection {}
+                data: NoDataMessage {}
             })) {
                 println!("error broadcasting disconnection: {}", e);
             }
@@ -125,7 +125,10 @@ async fn handle_message(
     broadcast_sender: &broadcast::Sender<ClientMessage>
 ) -> Result<(), Error> {
     let text = match msg? {
-        Message::Text(text) => text,
+        Message::Text(text) => {
+            println!("Text message content: {}", text);
+            text
+        },
         _ => return Ok(())
     };
 
@@ -139,7 +142,6 @@ async fn handle_message(
 
     match client_message {
         ClientMessage::Position(payload) => handle_position_message(payload, broadcast_sender).await,
-        ClientMessage::NewConnection(payload) => handle_new_connection_message(payload, broadcast_sender).await,
         _ => ()
     }
 

@@ -27,9 +27,8 @@ export const useWebsocketStore = create<WebsocketStateTS>((set, get) => ({
       try {
         const message = JSON.parse(event.data);
         if (message.type === "NewConnection") {
-          const { client_id, position } = message.data;
-          setPlayer(client_id, position);
-          set({ client_id });
+          setPlayer(message.client_id, message.data.position);
+          set({ client_id: message.client_id });
         }
 
         if (message.type === "Position") {

@@ -29,17 +29,16 @@ pub struct Position {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NewConnection {
-    pub client_id: String,
     pub position: Position
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Disconnection {}
+pub struct NoDataMessage {}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "type")]
 pub enum ClientMessage {
     Position(ClientMessagePayload<Position>),
     NewConnection(ClientMessagePayload<NewConnection>),
-    Disconnection(ClientMessagePayload<Disconnection>)
+    Disconnection(ClientMessagePayload<NoDataMessage>)
 }
