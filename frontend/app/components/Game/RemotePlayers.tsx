@@ -2,23 +2,23 @@ import { useGameStore } from "@/store/game-store";
 import { useFrame } from "@react-three/fiber";
 import React, { useMemo, useRef } from "react";
 import { Mesh } from "three";
+import { useContextMenu } from "./Enemy";
 
 export default React.memo(function RemotePlayers() {
-   // Only select the array of IDs using a stable reference
-  const remotePlayers = useGameStore((state) => 
-    // Convert remotePlayers to an ID-only array in the selector
-    Object.keys(state.remotePlayers).join(',')  // Using join to create a stable string
+  // Only select the array of IDs using a stable reference
+  const remotePlayers = useGameStore(
+    (state) =>
+      // Convert remotePlayers to an ID-only array in the selector
+      Object.keys(state.remotePlayers).join(",") // Using join to create a stable string
   );
-  
+
   // Convert back to array when rendering
-  const playerIds = useMemo(() => 
-    remotePlayers.split(',').filter(Boolean), 
+  const playerIds = useMemo(
+    () => remotePlayers.split(",").filter(Boolean),
     [remotePlayers]
   );
-  
-  return playerIds.map((id) => (
-    <RemotePlayer clientId={id} key={id} />
-  ));
+
+  return playerIds.map((id) => <RemotePlayer clientId={id} key={id} />);
 });
 
 const RemotePlayer = React.memo(function RemotePlayer({
@@ -28,6 +28,7 @@ const RemotePlayer = React.memo(function RemotePlayer({
 }) {
   const meshRef = useRef<Mesh>(null);
   const player = useGameStore((state) => state.remotePlayers[clientId]);
+  const handleContextMenu = useContextMenu("remote-player");
 
   useFrame(() => {
     if (!meshRef.current) return;
@@ -37,7 +38,11 @@ const RemotePlayer = React.memo(function RemotePlayer({
   });
 
   return (
-    <mesh ref={meshRef} position={[0, 0.5, 0]}>
+    <mesh
+      onContextMenu={handleContextMenu}
+      ref={meshRef}
+      position={[0, 0.5, 0]}
+    >
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial color="green" />
     </mesh>

@@ -3,6 +3,8 @@ import { create } from "zustand";
 
 type NPCTypeTS = "enemy" | "neutral" | "item";
 
+export type ContextMenuTypeTS = NPCTypeTS | 'remote-player'
+
 type NPCTS = {
   position: Vector2;
   type: NPCTypeTS;
@@ -11,12 +13,12 @@ type NPCTS = {
 type ContextMenuTS = {
   isOpen: boolean;
   position: Vector2;
-  npcType?: NPCTypeTS;
+  type?: ContextMenuTypeTS
 };
 
 type UIStoreTS = {
   contextMenu: ContextMenuTS;
-  openContextMenu: (npcType: NPCTypeTS, position: Vector2) => void;
+  openContextMenu: (type: ContextMenuTypeTS, position: Vector2) => void;
   closeContextMenu: () => void;
 
   selectedNPC?: NPCTS;
@@ -33,9 +35,9 @@ export const useUIStore = create<UIStoreTS>((set, get) => ({
     position: { x: 0, y: 0 },
   },
 
-  openContextMenu: (npcType, position) => {
+  openContextMenu: (type, position) => {
     set({
-      contextMenu: { ...get().contextMenu, isOpen: true, npcType, position },
+      contextMenu: { ...get().contextMenu, isOpen: true, type, position },
     });
   },
 
@@ -44,7 +46,7 @@ export const useUIStore = create<UIStoreTS>((set, get) => ({
       contextMenu: {
         isOpen: false,
         position: { x: 0, y: 0 },
-        npcType: undefined,
+        type: undefined,
       },
     });
   },

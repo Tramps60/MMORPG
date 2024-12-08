@@ -23,19 +23,27 @@ export default function ContextMenu() {
   return (
     <div
       ref={menuRef}
-      className="fixed bg-gray-900 rounded-lg shadow-lg py-1 z-50"
+      className="fixed bg-gray-900 rounded-md p-4 shadow-lg py-1 z-50"
       style={{
         left: contextMenu.position.x,
         top: contextMenu.position.y,
       }}
     >
       {contextMenu.isOpen &&
-        contextMenu.npcType &&
-        contextMenu.npcType === "enemy" && <EnemyMenu />}
+        contextMenu.type &&
+        contextMenu.type === "enemy" && <EnemyMenu />}
+
+      {contextMenu.isOpen &&
+        contextMenu.type &&
+        contextMenu.type === "remote-player" && <RemotePlayerMenu />}
     </div>
   );
 }
 
 function EnemyMenu() {
-  return <div>enemy menu</div>;
+  return <div className="text-xl p-12">enemy menu</div>;
+}
+
+function RemotePlayerMenu() {
+  return <div>remote player menu</div>;
 }

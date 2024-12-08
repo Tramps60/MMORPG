@@ -1,7 +1,20 @@
-import { useUIStore } from "@/store/ui-store";
+import { ContextMenuTypeTS, useUIStore } from "@/store/ui-store";
 import { ThreeEvent } from "@react-three/fiber";
 import { useRef } from "react";
 import { Mesh } from "three";
+
+export function useContextMenu(type: ContextMenuTypeTS) {
+  const openContextMenu = useUIStore((state) => state.openContextMenu);
+
+  const handleContextMenu = (event: ThreeEvent<MouseEvent>) => {
+    console.log("context menu triggered");
+    event.nativeEvent.preventDefault();
+    event.stopPropagation();
+    openContextMenu(type, { x: event.clientX, y: event.clientY });
+  }
+
+  return handleContextMenu
+}
 
 export default function Enemy() {
   const meshRef = useRef<Mesh>(null);
