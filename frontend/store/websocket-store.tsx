@@ -3,9 +3,11 @@ import { create } from "zustand";
 
 export const useWebsocketStore = create<WebsocketStateTS>((set, get) => ({
   socket: null,
+  client_id: undefined,
   isConnected: false,
   messages: [],
   connect: (url, setPlayer, updateRemotePlayer, deleteRemotePlayer) => {
+    const { client_id } = get()
     if (get().socket?.readyState === WebSocket.OPEN) {
       console.warn("Websocket is already connected");
       return;
@@ -32,7 +34,9 @@ export const useWebsocketStore = create<WebsocketStateTS>((set, get) => ({
         }
 
         if (message.type === "Position") {
-          updateRemotePlayer(message.client_id, message.data);
+          if (!client_id || client_id !== message.client_id) {
+            updateRemotePlayer(message.client_id, message.data);
+          }
         }
 
         if (message.type === "Disconnection") {

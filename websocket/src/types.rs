@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, serde::Serialize)]
 pub struct Client {
     pub client_id: String,
     pub world_position: Position

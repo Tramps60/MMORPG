@@ -92,12 +92,15 @@ async fn handle_socket(
                     println!("error handling message: {}", e)
                 }
             }
+            // disconnection so remove from game_state
             if let Err(e) = broadcast_sender.send(ClientMessage::Disconnection(ClientMessagePayload {
-                client_id: client_id_for_recieve,
+                client_id: client_id_for_recieve.clone(),
                 data: NoDataMessage {}
             })) {
                 println!("error broadcasting disconnection: {}", e);
             }
+
+            game_state_clone.remove_client(&client_id_for_recieve).await
         });
 
         let _ = ready_tx.send(());

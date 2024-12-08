@@ -1,6 +1,6 @@
 use tokio::sync::broadcast;
 
-use crate::types::{ClientMessage, ClientMessagePayload, NewConnection, Position};
+use crate::types::{ClientMessage, ClientMessagePayload, Position};
 
 pub async fn handle_position_message(
     payload: ClientMessagePayload<Position>,

@@ -1,25 +1,40 @@
 import { useGameStore } from "@/store/game-store";
-import { PlayerTS } from "@/types/game";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { Mesh } from "three";
 
-export default function RemotePlayers() {
-  const remotePlayers = useGameStore((state) => state.remotePlayers);
-  return Object.entries(remotePlayers).map(([id, position]) => (
-    <RemotePlayer player={{ id, position }} key={id} />
+export default React.memo(function RemotePlayers() {
+   // Only select the array of IDs using a stable reference
+  const remotePlayers = useGameStore((state) => 
+    // Convert remotePlayers to an ID-only array in the selector
+    Object.keys(state.remotePlayers).join(',')  // Using join to create a stable string
+  );
+  
+  // Convert back to array when rendering
+  const playerIds = useMemo(() => 
+    remotePlayers.split(',').filter(Boolean), 
+    [remotePlayers]
+  );
+  
+  return playerIds.map((id) => (
+    <RemotePlayer clientId={id} key={id} />
   ));
-}
+});
 
-function RemotePlayer({ player }: { player: PlayerTS }) {
-    const meshRef = useRef<Mesh>(null)
+const RemotePlayer = React.memo(function RemotePlayer({
+  clientId,
+}: {
+  clientId: string;
+}) {
+  const meshRef = useRef<Mesh>(null);
+  const player = useGameStore((state) => state.remotePlayers[clientId]);
 
-    useFrame(() => {
-        if (!meshRef.current) return;
+  useFrame(() => {
+    if (!meshRef.current) return;
 
-        meshRef.current.position.x = player.position.x
-        meshRef.current.position.z = player.position.y
-    })
+    meshRef.current.position.x = player.x;
+    meshRef.current.position.z = player.y;
+  });
 
   return (
     <mesh ref={meshRef} position={[0, 0.5, 0]}>
@@ -27,7 +42,7 @@ function RemotePlayer({ player }: { player: PlayerTS }) {
       <meshStandardMaterial color="green" />
     </mesh>
   );
-}
+});
 
 // when you attack find if player is in range
 // if player is not in range update path to go to enemy
