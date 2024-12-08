@@ -34,8 +34,12 @@ pub struct NewConnection {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Disconnection {}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "type")]
 pub enum ClientMessage {
     Position(ClientMessagePayload<Position>),
-    NewConnection(ClientMessagePayload<NewConnection>)
+    NewConnection(ClientMessagePayload<NewConnection>),
+    Disconnection(ClientMessagePayload<Disconnection>)
 }

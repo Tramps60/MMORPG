@@ -7,15 +7,15 @@ import { useGameStore } from "@/store/game-store";
 
 export default function Home() {
   const { connect, disconnect, isConnected } = useWebsocketStore();
-  const { setPlayer, updateOtherPlayers } = useGameStore()
+  const { setPlayer, updateRemotePlayer, deleteRemotePlayer } = useGameStore()
 
   useEffect(() => {
-    connect(WEBSOCKET_URL, setPlayer, updateOtherPlayers);
+    connect(WEBSOCKET_URL, setPlayer, updateRemotePlayer, deleteRemotePlayer);
 
     return () => {
       disconnect();
     };
-  }, [connect, disconnect, setPlayer, updateOtherPlayers]);
+  }, [connect, disconnect, setPlayer, updateRemotePlayer, deleteRemotePlayer]);
 
   return (
     <div className="h-screen w-full">

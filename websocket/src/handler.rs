@@ -4,7 +4,7 @@ use axum::{extract::{ws::{Message, WebSocket}, State, WebSocketUpgrade}, respons
 use futures::{SinkExt, StreamExt};
 use tokio::sync::broadcast;
 
-use crate::{types::{ClientMessage, ClientMessagePayload, NewConnection, Position}, Client, GameState};
+use crate::{types::{ClientMessage, ClientMessagePayload, Disconnection, NewConnection, Position}, Client, GameState};
 use crate::messages::{handle_new_connection_message, handle_position_message};
 
 pub async fn websocket_handler(
@@ -58,7 +58,8 @@ async fn handle_socket(
 
     let (ready_tx, ready_rx) = tokio::sync::oneshot::channel();
 
-    let client_id_for_comparison = client_id.clone();
+    let client_id_for_send = client_id.clone();
+    let client_id_for_recieve = client_id.clone();
     tokio::spawn(async move {
 
         let broadcast_sender = game_state_clone.broadcast_sender.clone();
@@ -70,9 +71,10 @@ async fn handle_socket(
                 let broadcaster_id = match &msg {
                     ClientMessage::Position(payload) => &payload.client_id,
                     ClientMessage::NewConnection(payload) => &payload.client_id,
+                    _ => &String::from("hello")
                 };
 
-                if broadcaster_id != &client_id_for_comparison {
+                if broadcaster_id != &client_id_for_send {
                     if let Ok(msg_for_client) = serde_json::to_string(&msg) {
                         if let Err(e) = sender.send(Message::Text(msg_for_client)).await {
                             println!("Error sending broadcast message to client: {}", e);
@@ -89,6 +91,12 @@ async fn handle_socket(
                 if let Err(e) = handle_message(msg, &broadcast_sender).await {
                     println!("error handling message: {}", e)
                 }
+            }
+            if let Err(e) = broadcast_sender.send(ClientMessage::Disconnection(ClientMessagePayload {
+                client_id: client_id_for_recieve,
+                data: Disconnection {}
+            })) {
+                println!("error broadcasting disconnection: {}", e);
             }
         });
 
@@ -131,7 +139,8 @@ async fn handle_message(
 
     match client_message {
         ClientMessage::Position(payload) => handle_position_message(payload, broadcast_sender).await,
-        ClientMessage::NewConnection(payload) => handle_new_connection_message(payload, broadcast_sender).await
+        ClientMessage::NewConnection(payload) => handle_new_connection_message(payload, broadcast_sender).await,
+        _ => ()
     }
 
     Ok(())

@@ -39,9 +39,9 @@ export default function Game() {
 }
 
 function OtherPlayers() {
-  const otherPlayers = useGameStore((state) => state.otherPlayers);
-  return otherPlayers.map((player) => (
-    <OtherPlayer player={player} key={player.id} />
+  const remotePlayers = useGameStore((state) => state.remotePlayers);
+  return Object.entries(remotePlayers).map(([id, position]) => (
+    <OtherPlayer player={{id, position}} key={id} />
   ));
 }
 

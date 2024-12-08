@@ -13,12 +13,14 @@ export type PlayerTS = {
 export type GameStateTS = {
   player?: PlayerTS;
   setPlayer: (client_id: string, position: Vector2) => void;
-  otherPlayers: PlayerTS[];
-  updateOtherPlayers: (client_id: string, position: Vector2) => void;
   updatePlayerPosition: (
     position: Vector2,
     sendMessage: (message: WebsocketMessage<{ x: number; y: number }>) => void
   ) => void;
+
+  remotePlayers: Record<string, Vector2>;
+  updateRemotePlayer: (client_id: string, position: Vector2) => void;
+  deleteRemotePlayer: (client_id: string) => void
 
   targetPosition?: Vector2;
   setTargetPosition: (position: Vector2) => void;

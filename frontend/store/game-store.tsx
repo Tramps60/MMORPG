@@ -8,22 +8,25 @@ export const useGameStore = create<GameStateTS>((set, get) => ({
     set(() => ({ player: { id: client_id, position } }));
   },
 
-  otherPlayers: [],
-  updateOtherPlayers: (client_id, position) => {
-    const { otherPlayers } = get();
+  remotePlayers: {},
+  updateRemotePlayer: (client_id, position) => {
+    const { remotePlayers } = get();
     
-    // Find if player already exists
-    const existingPlayerIndex = otherPlayers.findIndex(p => p.id === client_id);
-    
-    if (existingPlayerIndex !== -1) {
-      // Update existing player
-      const updatedPlayers = [...otherPlayers];
-      updatedPlayers[existingPlayerIndex].position = position;
-      set({ otherPlayers: updatedPlayers });
-    } else {
-      // Add new player
-      set({ otherPlayers: [...otherPlayers, { id: client_id, position }] });
-    }
+    set({
+      remotePlayers: {
+        ...remotePlayers,
+        [client_id]: position
+      }
+    })
+  },
+  deleteRemotePlayer: (client_id) => {
+    const { remotePlayers } = get();
+
+    const updatedPlayers = { ...remotePlayers }
+
+    delete updatedPlayers[client_id]
+
+    set({remotePlayers: updatedPlayers})
   },
 
   targetPosition: undefined,
